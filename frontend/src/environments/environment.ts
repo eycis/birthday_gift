@@ -13,6 +13,6 @@ export const environment = {
     messagingSenderId: '280603077226',
     appId: '1:280603077226:web:3f37e40adb9b50dc0ff813',
     measurementId: 'G-HN3Z8FXJ3L',
-    vapidKey: 'PASTE_YOUR_WEB_PUSH_CERTIFICATE_KEY'
+    vapidKey: 'BLOAIPWNwAqIjh8I0I5q_PHN0SoWwCUWBpcSiwPqIx4O4AukKQJjVClcodsO2SDhnlzRIyKzOM0u2ZB4q8NYQxQ'
   }
 };
