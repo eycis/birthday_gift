@@ -29,9 +29,6 @@ export class NotificationsService {
     }
 
     const vapidKey = environment.firebase.vapidKey;
-    if (!vapidKey || vapidKey.includes('PASTE_YOUR_WEB_PUSH_CERTIFICATE_KEY')) {
-      return 'missing-vapid-key';
-    }
 
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') {
@@ -88,7 +85,7 @@ export class NotificationsService {
 
     onMessage(messaging, (payload) => {
       const title = payload.notification?.title ?? 'Daily Letter';
-      const body = payload.notification?.body ?? 'Mas novou zpravu dne.';
+      const body = payload.notification?.body ?? 'New message of the day arrived';
 
       if (Notification.permission === 'granted') {
         new Notification(title, { body });
