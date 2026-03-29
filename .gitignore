@@ -1,0 +1,10 @@
+node_modules
+**/node_modules
+birthday-app-cb6e2-firebase-adminsdk-fbsvc-d25155cf96.json
+serviceAccount.json
+.firebase/
+firebase-debug.log
+dist/
+frontend/dist/
+.DS_Store
+README_GITHUB_SECRETS.md

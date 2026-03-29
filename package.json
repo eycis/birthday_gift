@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@angular/fire": "^20.0.1",
+    "firebase": "^11.10.0",
+    "firebase-admin": "^13.7.0",
+    "type" : "module"
+  }
+}
