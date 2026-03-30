@@ -71,9 +71,12 @@ async function sendDailyNotifications() {
 
   const db = admin.firestore();
   const { dayKey, hour, minute } = datePartsInPrague();
+  const inDeliveryWindow = (hour === 10 && minute >= 17) || (hour === 11 && minute < 30);
 
-  if (!forceSend && (hour !== 10 || minute > 10)) {
-    console.log(`[SKIP] Prague time is ${hour}:${String(minute).padStart(2, '0')}, waiting for 10:00.`);
+  if (!forceSend && !inDeliveryWindow) {
+    console.log(
+      `[SKIP] Prague time is ${hour}:${String(minute).padStart(2, '0')}, waiting for window 10:17-11:29.`
+    );
     return;
   }
 
