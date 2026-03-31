@@ -2,6 +2,10 @@ const admin = require('firebase-admin');
 
 const PRAGUE_TIMEZONE = 'Europe/Prague';
 const APP_LINK = process.env.APP_LINK || 'https://birthday-app-cb6e2.web.app';
+const DELIVERY_WINDOW_START_HOUR = 10;
+const DELIVERY_WINDOW_START_MINUTE = 17;
+const DELIVERY_WINDOW_END_HOUR = 11;
+const DELIVERY_WINDOW_END_MINUTE = 29;
 
 function readServiceAccount() {
   const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
@@ -59,6 +63,14 @@ function pickDailyMessage(messages, dayKey) {
   return messages[index];
 }
 
+function isInDeliveryWindow(hour, minute) {
+  const currentMinuteOfDay = (hour * 60) + minute;
+  const startMinuteOfDay = (DELIVERY_WINDOW_START_HOUR * 60) + DELIVERY_WINDOW_START_MINUTE;
+  const endMinuteOfDay = (DELIVERY_WINDOW_END_HOUR * 60) + DELIVERY_WINDOW_END_MINUTE;
+
+  return currentMinuteOfDay >= startMinuteOfDay && currentMinuteOfDay <= endMinuteOfDay;
+}
+
 async function sendDailyNotifications() {
   const serviceAccount = readServiceAccount();
   const projectId = process.env.FIREBASE_PROJECT_ID || serviceAccount.project_id;
@@ -71,11 +83,13 @@ async function sendDailyNotifications() {
 
   const db = admin.firestore();
   const { dayKey, hour, minute } = datePartsInPrague();
-  const inDeliveryWindow = (hour === 10 && minute >= 17) || (hour === 11 && minute < 30);
+  const inDeliveryWindow = isInDeliveryWindow(hour, minute);
 
   if (!forceSend && !inDeliveryWindow) {
     console.log(
-      `[SKIP] Prague time is ${hour}:${String(minute).padStart(2, '0')}, waiting for window 10:17-11:29.`
+      `[SKIP] Prague time is ${hour}:${String(minute).padStart(2, '0')}, waiting for window `
+      + `${DELIVERY_WINDOW_START_HOUR}:${String(DELIVERY_WINDOW_START_MINUTE).padStart(2, '0')}-`
+      + `${DELIVERY_WINDOW_END_HOUR}:${String(DELIVERY_WINDOW_END_MINUTE).padStart(2, '0')}.`
     );
     return;
   }
@@ -149,6 +163,14 @@ async function sendDailyNotifications() {
       batch.delete(db.collection('notification_tokens').doc(token));
     });
     await batch.commit();
+  }
+
+  if (sentCount === 0) {
+    console.log(
+      `[WARN] ${dayKey}: no notifications were delivered successfully `
+      + `(failed=${failedCount}, tokens=${tokens.length}). Leaving day unsent for later retries.`
+    );
+    return;
   }
 
   await logRef.set({
